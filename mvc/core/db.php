@@ -5,7 +5,7 @@ class Database
     public $hostName = "localhost:3333";
     public $username = "root";
     public $password = "";
-    public $dbName = "todo_list";
+    public $dbName = "web_sales";
     public $conn;
 
     function __construct()
