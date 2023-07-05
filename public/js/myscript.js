@@ -93,6 +93,5 @@ function delAll(__this) {
 $(document).ready(function () {
   setTimeout(function () {
     $("#messError").hide(500);
-    console.log("aaaa");
   }, 1000);
 });

@@ -2,26 +2,26 @@
 require_once "./mvc/core/redirect.php";
 require_once "./mvc/controllers/MyController.php";
 
-class category extends controller
+class module extends controller
 {
 
-    public $CategoryModels;
+    public $ModuleModels;
     public $MyController;
-    var $template = 'category/';
-    var $title = "danh mục sản phẩm";
-    const type = 1;
+    var $template = 'module/';
+    var $title = "Module";
 
     function __construct()
     {
-        $this->CategoryModels = $this->models('CategoryModels');
+        $this->ModuleModels = $this->models('ModuleModels');
         $this->MyController = new MyController;
     }
     public function index()
     {
+
         $data_admin = $this->MyController->getIndexAdmin();
-        $datas = $this->CategoryModels->select_array('*', ['parentID' => 0]);
+        $datas = $this->ModuleModels->select_array('*', ['parentID' => 0]);
         foreach ($datas as $key => $val) {
-            $children = $this->CategoryModels->select_array('*', ['parentID' => $val['id']]);
+            $children = $this->ModuleModels->select_array('*', ['parentID' => $val['id']]);
             $datas[$key]['children'] = $children;
         }
         $data = [
@@ -30,6 +30,7 @@ class category extends controller
             'template' => $this->template,
             'datas' => $datas,
             "data_admin" => $data_admin,
+
         ];
 
         $this->view('masterlayout', $data);
@@ -39,12 +40,17 @@ class category extends controller
     public function add()
     {
         $data_admin = $this->MyController->getIndexAdmin();
+        $sort_max = $this->ModuleModels->select_max_fields('sort', NULL);
         if (isset($_POST['submit'])) {
             $data_post = $_POST['data_post'];
+            $data_post['name'] = trim($data_post['name']);
+            $data_post['link'] = trim($data_post['link']);
+            $data_post['controller'] = trim($data_post['controller']);
             $data_post['publish'] ? $publish = 1 : $publish = 0;
             $data_post['publish'] = $publish;
-            $data_post['type'] = self::type;
-            $result = $this->CategoryModels->add($data_post);
+            $data_post['sort'] = $sort_max["sort"] + 1;
+            $data_post['created_at'] = gmdate('Y-m-d H:i:s', time() + 7 * 3600);
+            $result = $this->ModuleModels->add($data_post);
             $return = json_decode($result, true);
             if ($return['type'] == 'sucessFully') {
                 $redirect = new redirect($this->template . "index");
@@ -54,7 +60,7 @@ class category extends controller
 
 
         //parentID
-        $parent = $this->CategoryModels->select_array('*', ['parentID' => 0]);
+        $parent = $this->ModuleModels->select_array('*', ['parentID' => 0]);
         $data = [
             'page' => $this->template . 'add',
             'title' => 'thêm mới ' . $this->title,
@@ -68,9 +74,9 @@ class category extends controller
 
     public function edit($id)
     {
-        $datas = $this->CategoryModels->select_array('*', ['id' => $id]);
-        $parent = $this->CategoryModels->select_array('*', ['parentID' => 0]);
         $data_admin = $this->MyController->getIndexAdmin();
+        $datas = $this->ModuleModels->select_array('*', ['id' => $id]);
+        $parent = $this->ModuleModels->select_array('*', ['parentID' => 0]);
 
 
         if (isset($_POST['submit'])) {
@@ -79,10 +85,13 @@ class category extends controller
                 $redirect = new redirect($this->template . "index");
                 $redirect->setFlash('error', "id của danah mục này trùng với id hiện tại");
             } else {
+                $data_post['name'] = trim($data_post['name']);
+                $data_post['link'] = trim($data_post['link']);
+                $data_post['controller'] = trim($data_post['controller']);
                 $data_post['publish'] ? $publish = 1 : $publish = 0;
                 $data_post['publish'] = $publish;
                 $data_post['updated_at'] = gmdate('Y-m-d H:i:s', time() + 7 * 3600);
-                $result = $this->CategoryModels->update($data_post, ['id' => $id]);
+                $result = $this->ModuleModels->update($data_post, ['id' => $id]);
                 $return = json_decode($result, true);
                 if ($return['type'] == 'sucessFully') {
                     $redirect = new redirect($this->template . "index");
@@ -108,7 +117,7 @@ class category extends controller
         $id = $_POST['id'];
         $vaule = $_POST['value'];
         $dataUpdate['publish'] = $vaule;
-        $result = $this->CategoryModels->update($dataUpdate, ['id' => $id]);
+        $result = $this->ModuleModels->update($dataUpdate, ['id' => $id]);
         $return = json_decode($result, true);
         if ($return['type'] == "sucessFully") {
             echo json_encode(
@@ -124,11 +133,11 @@ class category extends controller
     public function delete()
     {
         $id = $_POST['id'];
-        $result = $this->CategoryModels->delete(['id' => $id]);
+        $result = $this->ModuleModels->delete(['id' => $id]);
 
         $return = json_decode($result, true);
         if ($return['type'] == "sucessFully") {
-            $this->CategoryModels->update(['parentID' => 0], ['parentID' => $id]);
+            $this->ModuleModels->update(['parentID' => 0], ['parentID' => $id]);
             echo json_encode(
                 [
                     'result' => "true",
@@ -143,7 +152,7 @@ class category extends controller
         $listID = $_POST["listID"];
         $arrayID = explode(",", $listID);
         foreach ($arrayID as $key => $val) {
-            $this->CategoryModels->delete(['id' => $val]);
+            $this->ModuleModels->delete(['id' => $val]);
         }
         echo json_encode(
             [

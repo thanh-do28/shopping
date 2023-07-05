@@ -169,4 +169,31 @@ class MyModels extends Database
             return $query->fetchAll(PDO::FETCH_ASSOC);
         }
     }
+
+
+    function select_max_fields($data = '', $where = NULL)
+    {
+        if ($data != '') {
+            $sql = "SELECT MAX(" . $data . ") as sort FROM $this->table";
+        }
+        if ($where != NULL) {
+            $where_array = array_keys($where);
+            $value_where = array_values($where);
+            $isFields_where = true;
+            $stringWhere = 'WHERE';
+            for ($i = 0; $i < count($where_array); $i++) {
+                if (!$isFields_where) {
+                    $sql .= "and";
+                    $stringWhere = '';
+                }
+                $isFields_where = false;
+                $sql .= "" . $stringWhere . "" . $where_array[$i] . "=?";
+            }
+            $query = $this->conn->prepare($sql);
+            $query->execute($value_where);
+        }
+        $query = $this->conn->prepare($sql);
+        $query->execute();
+        return $query->fetch(PDO::FETCH_ASSOC);
+    }
 }

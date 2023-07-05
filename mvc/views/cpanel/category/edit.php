@@ -29,7 +29,7 @@
                     </div>
                     <div class="form-group">
                         <label for="publish">hiển thị</label>
-                        <input id="publish" type="checkbox" checked name="data_post[publish]">
+                        <input id="publish" type="checkbox" <?= $data['datas'][0]['publish'] == 1 ? "checked" : "" ?> name="data_post[publish]">
                     </div>
                     <div class="form-group">
                         <button class="btn btn-primary" name="submit" type="submit">cập nhật</button>
